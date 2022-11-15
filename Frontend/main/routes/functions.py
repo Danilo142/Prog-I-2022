@@ -3,7 +3,7 @@ from flask import request, current_app, redirect, url_for
 import requests, json
 
 def get_poems_by_id(id, page = 1, per_page = 10):
-    api_url = f'{current_app.config['API_URL']}/poems'
+    api_url = f'{current_app.config['API_URL']}/poems' 
 
     data = {"id": id, "page": page, "per_page": per_page, "user_id": id}
 

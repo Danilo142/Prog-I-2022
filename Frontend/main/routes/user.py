@@ -9,3 +9,5 @@ def index():
 @author.route('/author:<id>')
 def profile(id):
     return render_template('user_profile.html')
+
+
