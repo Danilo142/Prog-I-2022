@@ -1,5 +1,3 @@
-
-
 from flask_restful import Resource
 from flask import request, jsonify
 from .. import db
@@ -11,7 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 class Poem(Resource):
     def get(self, id):
         poem = db.session.query(PoemModel).get_or_404(id)
-        return poem.to_json()
+        return poem.to_json_short()
 
     @jwt_required()
     def delete(self, id):
@@ -19,28 +17,32 @@ class Poem(Resource):
         user_id = get_jwt_identity()
         poem = db.session.query(PoemModel).get_or_404(id)
         if "role" in claims:
-            if claims['role'] == "admin" or user_id == int(poem.user_id):
+            if user_id == int(poem.user_id):
                 db.session.delete(poem)
                 db.session.commit()
                 return '', 204
             else:
-                return "Only admins and poets can delete poems"
-    
-    """def put(self, id):
+                return "Only poets can delete poems"
+    @jwt_required()
+    def put(self, id):
+        claims = get_jwt()
+        user_id = get_jwt_identity()
         poem = db.session.query(PoemModel).get_or_404(id)
         data = request.get_json().items()
-        for key, value in data:
-            setattr(poem,key,value)
+        if "role" in claims:
+            if user_id == int(poem.user_id):
+                for key, value in data:
+                    setattr(poem,key,value)
         db.session.add(poem)
         db.session.commit()
-        return poem.to_json(), 201 """
+        return poem.to_json(), 201 
 
 class Poems(Resource):
     @jwt_required(optional=True)
     def get(self):
         poems = db.session.query(PoemModel)
         page = 1
-        per_page = 10
+        per_page = 5
         claims = get_jwt()
         identify_user = get_jwt_identity()
         if identify_user:
@@ -52,7 +54,7 @@ class Poems(Resource):
                         page = int(value)
                     if key == "per_page":
                         per_page = int(value)
-            poems = db.session.query(PoemModel).filter(PoemModel.user_id != identify_user)
+            poems = db.session.query(PoemModel).filter(PoemModel.user_id == identify_user)
             poems = poems.outerjoin(PoemModel.qualifications).group_by(PoemModel.id).order_by(func.count(PoemModel.qualifications))
         else:
             if request.get_json():
@@ -72,6 +74,9 @@ class Poems(Resource):
                         poems = poems.filter(PoemModel.date_time >= datetime.strptime(value, '%d-%m-%Y'))
                     if key == "created[lt]":
                         poems = poems.filter(PoemModel.date_time <= datetime.strptime(value, '%d-%m-%Y'))
+                    if key == "qualification":
+                        poems = poems.outerjoin(PoemModel.marks).group_by(PoemModel.id).having(func.mean(QualificationModel.score).like(float(value)))
+                    
                     # Order
                     if key == "sort_by":
                         if value == "author":
@@ -96,6 +101,12 @@ class Poems(Resource):
                     "pages": poems.pages, 
                     "page": page
                     })
+            return jsonify({
+                "poems":[poem.to_json_short() for poem in poems.items],
+                "total": poems.total, 
+                "pages": poems.pages, 
+                "page": page
+                })
         else:
             return jsonify({
                 "poems":[poem.to_json_short() for poem in poems.items],
@@ -113,12 +124,9 @@ class Poems(Resource):
         claims = get_jwt()
         if "role" in claims:
             if claims["role"] == "poet":
-                if len(user.poems) == 0 or len(user.qualifications) >= 2:
-                    poem.user_id = user_id
-                    db.session.add(poem)
-                    db.session.commit()
-                    return poem.to_json(), 201
-                else:
-                    return "There are not enough qualifications from this user"
+                poem.user_id = user_id
+                db.session.add(poem)
+                db.session.commit()
+                return poem.to_json(), 201
             else:
                 return "Only poets can create poems"

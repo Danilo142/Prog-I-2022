@@ -1,8 +1,7 @@
-Welcome {{user.name}}!
+Bienvenido {{user.name}}!
 
+Gracias por registrarte en nuestro sistema.
 
-Thank you for registering in our system.
-
-load poems
-delete poems
-search poems
+Cargar tus poemas
+Eliminar poemas
+Buscar poemas

@@ -1,2 +1,2 @@
-source bin/activate 
-python3 app.py 
+source bin/activate #Activar entorno virtual
+python3 app.py #Ejecutar app.py

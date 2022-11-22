@@ -6,20 +6,19 @@ class Qualification(db.Model):
     comment = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     poem_id = db.Column(db.Integer, db.ForeignKey('poem.id'), nullable=False)
- 
+    # Relaciones
     user = db.relationship('User', back_populates="qualifications", uselist=False, single_parent=True)
     poem = db.relationship('Poem', back_populates="qualifications", uselist=False, single_parent=True)
 
     def __repr__(self):
         return f'<Score: {self.score}, Comment: {self.comment}, User id: {self.user_id}, Poem id {self.poem_id}>'
-
+    # Objeto a JSON
     def to_json_complete(self):
         poem = poem.to_json()
         user = [users.to_json() for users in self.user]
         qualification_json = {
             'id': self.id,
             'name': str(self.name),
-            'password': str(self.password),
             'role': str(self.role),
             'email': str(self.email),
             'poem' : poem,
@@ -38,7 +37,7 @@ class Qualification(db.Model):
         return qualification_json
 
     @staticmethod
- 
+    # JSON a objeto
     def from_json(qualification_json):
         id = qualification_json.get('id')
         score = qualification_json.get('score')
@@ -46,3 +45,5 @@ class Qualification(db.Model):
         poem_id = qualification_json.get('poem_id')
         user_id = qualification_json.get('user_id')
         return Qualification(id=id, score=score, comment=comment, poem_id=poem_id, user_id=user_id)
+
+    
