@@ -9,7 +9,7 @@ app = Blueprint('app', __name__, url_prefix='/')
 
 @app.route('/')
 def index():
-    api_url = f'{current_app.config['API_URL']}/poems'
+    api_url = f'{current_app.config["API_URL"]}/poems'
     data = {"page": 1, "per_page": 10}
     headers = {"Content-Type": "application/json"}
     response = requests.get(api_url, data = data, headers = headers)
@@ -27,7 +27,7 @@ def login():
         print(email, password)
 
         if email != None and password != None:
-            api_url = f'{current_app.config['API_URL']}/users/login'
+            api_url = f'{current_app.config["API_URL"]}/users/login'
             data = {"email": email, "password": password}
             headers = {"Content-Type": "application/json"}
             response = requests.post(api_url, data = data, headers = headers)
@@ -54,8 +54,8 @@ def register():
 
 @app.route('/home')
 def user_main():
-    if request.cookies.get('access_token')
-         api_url = f'{current_app.config['API_URL']}/users'
+    if request.cookies.get('access_token'):
+         api_url = f'{current_app.config["API_URL"]}/users'
          headers = {"Content-Type": "application/json"}
          response = requests.get(api_url, headers = headers)
          print(response.status_code)
@@ -68,8 +68,8 @@ def user_main():
 
 @app.route('/profile')
 def user_profile():
-    if request.cookies.get('access_token')
-        api_url = f'{current_app.config['API_URL']}/users'
+    if request.cookies.get('access_token'):
+        api_url = f'{current_app.config["API_URL"]}/users'
         headers = {"Content-Type": "application/json"}
         data = {"page": 1, "per_page": 10}
         response = requests.get(api_url, data = data, headers = headers)
@@ -80,7 +80,7 @@ def user_profile():
 
 @app.route('/view/poem/<int:id>', methods = ['GET'])
 def view_poem(id):
-    api_url = f'{current_app.config['API_URL']}/poems/{id}'
+    api_url = f'{current_app.config["API_URL"]}/poems/{id}'
     headers = {"Content-Type": "application/json"}
     response = requests.get(api_url, headers = headers)
     print(response.status_code)
@@ -112,7 +112,7 @@ def create_poem():
             print(data)
             headers = {"Content-Type": "application/json", "Authorization": f"Bearer{jwt}"}
             if title != "" and body != "":
-                response = requests.post(f'{current_app.config['API_URL']}/poems', data = data, headers = headers)
+                response = requests.post(f'{current_app.config["API_URL"]}/poems', data = data, headers = headers)
                 print(response)
                 if response.ok:
                     response = json.loads(response.text)
